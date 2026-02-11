@@ -1,0 +1,67 @@
+1) Create a file and add executable permission to all users:
+
+akshaya@AV2k6:~/Linux$ touch file
+akshaya@AV2k6:~/Linux$ chmod a+x file
+akshaya@AV2k6:~/Linux$ ls -l file
+-rwxr-xr-x 1 akshaya akshaya 0 Feb 11 13:21 file
+
+2) Create a file and remove write permission for group user alone:
+
+akshaya@AV2k6:~/Linux$ touch file1
+akshaya@AV2k6:~/Linux$ chmod g-w file1
+akshaya@AV2k6:~/Linux$ ls -l file1
+-rw-r--r-- 1 akshaya akshaya 0 Feb 11 13:22 file1
+
+3) Create a file and add a soft link in a different directory:
+
+akshaya@AV2k6:~/Linux$ mkdir -p dir1/dir2
+akshaya@AV2k6:~/Linux$ touch dir1/dir2/file
+akshaya@AV2k6:~/Linux$ ln -s dir1/dir2/file dir1/file_link
+akshaya@AV2k6:~/Linux$ ls -l dir1
+total 4
+drwxr-xr-x 2 akshaya akshaya 4096 Feb 11 13:24 dir2
+lrwxrwxrwx 1 akshaya akshaya   14 Feb 11 13:24 file_link -> dir1/dir2/file
+
+4) Use ps command to display all active processes:
+
+akshaya@AV2k6:~/Linux$ ps -ef
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 13:21 ?        00:00:00 /sbin/init
+root           2       1  0 13:21 ?        00:00:00 /init
+root           6       2  0 13:21 ?        00:00:00 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 10 --log-truncat
+root          52       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd-journald
+root         100       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd-udevd
+systemd+     110       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd-resolved
+systemd+     118       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd-timesyncd
+root         188       1  0 13:21 ?        00:00:00 /usr/sbin/cron -f -P
+message+     189       1  0 13:21 ?        00:00:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activat
+root         196       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd-logind
+root         198       1  0 13:21 ?        00:00:00 /usr/libexec/wsl-pro-service -vv
+root         213       1  0 13:21 hvc0     00:00:00 /sbin/agetty -o -p -- \u --noclear --keep-baud - 115200,38400,9600 vt220
+syslog       219       1  0 13:21 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+root         221       1  0 13:21 tty1     00:00:00 /sbin/agetty -o -p -- \u --noclear - linux
+root         230       1  0 13:21 ?        00:00:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --w
+root         319       2  0 13:21 ?        00:00:00 /init
+root         320     319  0 13:21 ?        00:00:00 /init
+akshaya      321     320  0 13:21 pts/0    00:00:00 -bash
+root         322       2  0 13:21 pts/1    00:00:00 /bin/login -f
+akshaya      368       1  0 13:21 ?        00:00:00 /usr/lib/systemd/systemd --user
+akshaya      369     368  0 13:21 ?        00:00:00 (sd-pam)
+akshaya      393     322  0 13:21 pts/1    00:00:00 -bash
+akshaya      483     321  0 13:25 pts/0    00:00:00 ps -ef
+
+5) Create 3 files and redirect sorted output (by timestamp) to a file:
+
+akshaya@AV2k6:~/Linux$ cd dir1
+akshaya@AV2k6:~/Linux/dir1$ touch file1
+akshaya@AV2k6:~/Linux/dir1$ touch file2
+akshaya@AV2k6:~/Linux/dir1$ touch file3
+akshaya@AV2k6:~/Linux$ ls -lt dir1 > sorted_list.txt
+akshaya@AV2k6:~/Linux$ cat sorted_list.txt
+total 4
+-rw-r--r-- 1 akshaya akshaya    0 Feb 11 13:28 sorted_list.txt
+-rw-r--r-- 1 akshaya akshaya    0 Feb 11 13:27 file3
+-rw-r--r-- 1 akshaya akshaya    0 Feb 11 13:27 file2;
+-rw-r--r-- 1 akshaya akshaya    0 Feb 11 13:27 file1
+lrwxrwxrwx 1 akshaya akshaya   14 Feb 11 13:24 file_link -> dir1/dir2/file
+drwxr-xr-x 2 akshaya akshaya 4096 Feb 11 13:24 dir2
