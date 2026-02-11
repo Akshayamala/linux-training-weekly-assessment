@@ -1,0 +1,85 @@
+BACKUP MANAGER SHELL SCRIPT :
+
+akshaya@AV2k6:~/Linux$ cat backup_manager.sh
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then
+    echo "Enter the inputs as command line argument"
+    exit 1
+fi
+
+SRC="$1"
+DEST="$2"
+EXT="$3"
+
+if [ ! -d "$SRC" ]; then
+    echo "Source directory does not exist"
+    exit 1
+fi
+
+if [ ! -d "$DEST" ]; then
+    mkdir -p "$DEST" || { echo "Failed to create backup directory"; exit 1; }
+fi
+
+FILES=("$SRC"/*"$EXT")
+
+if [ ! -e "${FILES[0]}" ]; then
+    echo "No files with extension $EXT found"
+    exit 1
+fi
+
+export BACKUP_COUNT=0
+TOTAL_SIZE=0
+
+echo "Files to be backed up:"
+for file in "${FILES[@]}"; do
+    size=$(stat -c%s "$file")
+    echo "$(basename "$file") - $size bytes"
+done
+
+for file in "${FILES[@]}"; do
+    base=$(basename "$file")
+    dest_file="$DEST/$base"
+
+    if [ -f "$dest_file" ]; then
+        if [ "$file" -nt "$dest_file" ]; then
+            cp "$file" "$dest_file"
+            ((BACKUP_COUNT++))
+            ((TOTAL_SIZE+= $(stat -c%s "$file") ))
+        fi
+    else
+        cp "$file" "$dest_file"
+        ((BACKUP_COUNT++))
+        ((TOTAL_SIZE+= $(stat -c%s "$file") ))
+    fi
+done
+
+REPORT="$DEST/backup_report.log"
+
+echo "Backup Summary" > "$REPORT"
+echo "Total files processed: $BACKUP_COUNT" >> "$REPORT"
+echo "Total size backed up: $TOTAL_SIZE bytes" >> "$REPORT"
+echo "Backup directory: $DEST" >> "$REPORT"
+
+echo "Backup completed. Report saved at $REPORT"
+
+
+OUTPUT:
+
+akshaya@AV2k6:~/Linux$ nano backup_manager.sh
+akshaya@AV2k6:~/Linux$ chmod +x backup_manager.sh
+akshaya@AV2k6:~/Linux$ mkdir source
+akshaya@AV2k6:~/Linux$ mkdir backup
+akshaya@AV2k6:~/Linux$ touch source/a.txt source/b.txt source/c.log
+akshaya@AV2k6:~/Linux$ ./backup_manager.sh source backup .txt
+Files to be backed up:
+a.txt - 0 bytes
+b.txt - 0 bytes
+Backup completed. Report saved at backup/backup_report.log
+akshaya@AV2k6:~/Linux$ ls backup
+a.txt  b.txt  backup_report.log
+akshaya@AV2k6:~/Linux$ cat backup/backup_report.log
+Backup Summary
+Total files processed: 2
+Total size backed up: 0 bytes
+Backup directory: backup
