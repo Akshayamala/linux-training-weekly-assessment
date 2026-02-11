@@ -1,0 +1,104 @@
+1) List all files larger than 1MB and save output to a file:
+
+akshaya@AV2k6:~/Linux$ find . -type f -size +1M > large_files.txt
+akshaya@AV2k6:~/Linux$ cat large_files.txt
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 6 (part 1)-20250205_110441-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 3-20250127_110037-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 5-20250131_110141-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 2-20250123_105859-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 6 (part 2)-20250210_110404-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 1-20250120_110613-Meeting Recording.mp4
+./Campus Hires 2025 Batch _ Linux Training Program _ Technical Session 4-20250129_110417-Meeting Recording.mp4
+
+2) Replace "localhost" with "127.0.0.1" and save new file:
+
+akshaya@AV2k6:~/Linux$ cat config.txt
+# Database Configuration
+db_host=localhost
+db_port=5432
+
+# API Settings
+api_url=http://localhost:8080/v1
+callback_domain=localhost
+
+# Redis Cache
+redis_server=localhost
+akshaya@AV2k6:~/Linux$ sed 's/localhost/127.0.0.1/g' config.txt > updated_config.txt
+akshaya@AV2k6:~/Linux$ cat updated_config.txt
+# Database Configuration
+db_host=127.0.0.1
+db_port=5432
+
+# API Settings
+api_url=http://127.0.0.1:8080/v1
+callback_domain=127.0.0.1
+
+# Redis Cache
+redis_server=127.0.0.1
+
+3) Search ERROR but exclude DEBUG lines → save to file:
+
+akshaya@AV2k6:~/Linux$ cat log.txt
+DEBUG: Starting the application initialization.
+ERROR: Unable to connect to the database.
+INFO: User 'admin' logged in successfully.
+DEBUG: Fetching configuration settings from the server.
+ERROR: DEBUG - Configuration settings could not be applied.
+INFO: Scheduled job 'backup' completed successfully.
+DEBUG: Connection to server timed out. Retrying...
+ERROR: Failed to fetch data from API endpoint '/users'.
+INFO: Maintenance mode activated.
+ERROR: DEBUG - Query execution failed due to a syntax error.
+DEBUG: Reloading application modules.
+ERROR: Missing required parameter in the request.
+INFO: Shutting down the system gracefully.
+DEBUG: Closing unused network connections.
+ERROR: DEBUG - Unexpected server response received.
+akshaya@AV2k6:~/Linux$ grep "ERROR" log.txt | grep -v "DEBUG" > filtered_log.txt
+akshaya@AV2k6:~/Linux$ cat filtered_log.txt
+ERROR: Unable to connect to the database.
+ERROR: Failed to fetch data from API endpoint '/users'.
+ERROR: Missing required parameter in the request.
+
+4) Identify highest memory process and terminate it:
+
+akshaya@AV2k6:~/Linux$ ps aux --sort=-%mem | awk 'NR==2 {print $2}'
+230
+akshaya@AV2k6:~/Linux$ kill -9 $(ps aux --sort=-%mem | awk 'NR==2 {print $2}')
+-bash: kill: (230) - Operation not permitted
+akshaya@AV2k6:~/Linux$ ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.1  21696 12396 ?        Ss   13:03   0:01 /sbin/init
+root           2  0.0  0.0   3120  2048 ?        Sl   13:03   0:00 /init
+root           6  0.0  0.0   3172  2664 ?        Sl   13:03   0:12 plan9 --control-socket 7 --log-level 4 --server-fd 8 --pipe-fd 1
+root          52  0.0  0.1  66740 15092 ?        S<s  13:03   0:02 /usr/lib/systemd/systemd-journald
+root         100  0.0  0.0  25268  6528 ?        Ss   13:03   0:05 /usr/lib/systemd/systemd-udevd
+systemd+     110  0.0  0.1  21452 12544 ?        Ss   13:03   0:00 /usr/lib/systemd/systemd-resolved
+systemd+     118  0.0  0.0  91020  7552 ?        Ssl  13:03   0:00 /usr/lib/systemd/systemd-timesyncd
+root         188  0.0  0.0   4236  2560 ?        Ss   13:03   0:00 /usr/sbin/cron -f -P
+message+     189  0.0  0.0   9532  4992 ?        Ss   13:03   0:00 @dbus-daemon --system --address=systemd: --nofork --nopidfile --
+root         196  0.0  0.1  17964  8448 ?        Ss   13:03   0:00 /usr/lib/systemd/systemd-logind
+root         198  0.0  0.1 1756096 13696 ?       Ssl  13:03   0:00 /usr/libexec/wsl-pro-service -vv
+root         213  0.0  0.0   3160  2048 hvc0     Ss+  13:03   0:00 /sbin/agetty -o -p -- \u --noclear --keep-baud - 115200,38400,96
+syslog       219  0.0  0.0 222508  5504 ?        Ssl  13:03   0:00 /usr/sbin/rsyslogd -n -iNONE
+root         221  0.0  0.0   3116  1920 tty1     Ss+  13:03   0:00 /sbin/agetty -o -p -- \u --noclear - linux
+root         230  0.0  0.2 107012 22656 ?        Ssl  13:03   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgra
+root         319  0.0  0.0   3124   900 ?        Ss   13:03   0:00 /init
+root         320  0.0  0.0   3140  1160 ?        S    13:03   0:00 /init
+akshaya      321  0.0  0.0   6068  5248 pts/0    Ss   13:03   0:00 -bash
+root         322  0.0  0.0   6696  4480 pts/1    Ss   13:03   0:00 /bin/login -f
+akshaya      368  0.0  0.1  20304 11392 ?        Ss   13:03   0:00 /usr/lib/systemd/systemd --user
+akshaya      369  0.0  0.0  21144  3516 ?        S    13:03   0:00 (sd-pam)
+akshaya      393  0.0  0.0   6072  5248 pts/1    S+   13:03   0:00 -bash
+root         828  0.0  0.0   3124   908 ?        Ss   13:39   0:00 /init
+root         829  0.0  0.0   3140  1296 ?        S    13:39   0:00 /init
+akshaya      835  0.0  0.0   6068  5248 pts/2    Ss   13:39   0:00 -bash
+akshaya    23022  0.0  0.0   3268  1664 pts/0    S+   16:50   0:00 cat
+akshaya    23070  0.0  0.0   3268  1664 pts/2    T    16:56   0:00 cat
+akshaya    23109  0.0  0.0   8280  4224 pts/2    R+   17:00   0:00 ps aux
+
+5) Print all gateways in sorted manner:
+
+akshaya@AV2k6:~/Linux$ ip route | grep default | awk '{print $3}' | sort
+192.168.112.1
+
