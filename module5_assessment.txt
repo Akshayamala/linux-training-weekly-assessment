@@ -1,0 +1,116 @@
+FILE ANALYZING:
+
+akshaya@AV2k6:~/Linux$ nano file_analyzer.sh
+akshaya@AV2k6:~/Linux$ cat file_analyzer.sh
+#!/bin/bash
+
+ERROR_LOG="errors.log"
+
+log_error() {
+    echo "ERROR: $1" | tee -a "$ERROR_LOG"
+}
+
+show_help() {
+cat << EOF
+Usage: $0 -d <directory> -k <keyword>
+       $0 -f <file> -k <keyword>
+       $0 --help
+
+Options:
+ -d <directory>   Directory to search recursively
+ -f <file>        File to search directly
+ -k <keyword>     Keyword to search
+ --help           Show help menu
+EOF
+}
+
+search_recursive() {
+    local dir="$1"
+    local keyword="$2"
+
+    for item in "$dir"/*; do
+        [ -e "$item" ] || continue
+
+        if [ -d "$item" ]; then
+            search_recursive "$item" "$keyword"
+        elif [ -f "$item" ]; then
+            if grep -q "$keyword" "$item"; then
+                echo "Keyword found in: $item"
+            fi
+        fi
+    done
+}
+
+if [[ "$1" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
+while getopts ":d:f:k:" opt; do
+    case $opt in
+        d) DIRECTORY="$OPTARG" ;;
+        f) FILE="$OPTARG" ;;
+        k) KEYWORD="$OPTARG" ;;
+        \?) log_error "Invalid option -$OPTARG"; exit 1 ;;
+    esac
+done
+
+echo "Script Name: $0"
+echo "Number of Arguments: $#"
+echo "All Arguments: $@"
+
+if [[ -z "$KEYWORD" || ! "$KEYWORD" =~ ^[a-zA-Z0-9_]+$ ]]; then
+    log_error "Invalid or empty keyword"
+    exit 1
+fi
+
+if [ -n "$FILE" ]; then
+    if [ ! -f "$FILE" ]; then
+        log_error "File does not exist"
+        exit 1
+    fi
+
+    while read -r line; do
+        if [[ "$line" == *"$KEYWORD"* ]]; then
+            echo "Match found: $line"
+        fi
+    done <<< "$(cat "$FILE")"
+fi
+
+if [ -n "$DIRECTORY" ]; then
+    if [ ! -d "$DIRECTORY" ]; then
+        log_error "Directory does not exist"
+        exit 1
+    fi
+
+    search_recursive "$DIRECTORY" "$KEYWORD"
+fi
+
+echo "Exit Status: $?"
+
+akshaya@AV2k6:~/Linux$ chmod +x file_analyzer.sh
+
+akshaya@AV2k6:~/Linux$ ./file_analyzer.sh -d logs -k error
+Script Name: ./file_analyzer.sh
+Number of Arguments: 4
+All Arguments: -d logs -k error
+Keyword found in: logs/a.txt
+Exit Status: 0
+
+akshaya@AV2k6:~/Linux$ ./file_analyzer.sh -f script.sh -k TODO
+Script Name: ./file_analyzer.sh
+Number of Arguments: 4
+All Arguments: -f script.sh -k TODO
+Match found: TODO: fix this
+Exit Status: 0
+
+akshaya@AV2k6:~/Linux$ ./file_analyzer.sh --help
+Usage: ./file_analyzer.sh -d <directory> -k <keyword>
+       ./file_analyzer.sh -f <file> -k <keyword>
+       ./file_analyzer.sh --help
+
+Options:
+ -d <directory>   Directory to search recursively
+ -f <file>        File to search directly
+ -k <keyword>     Keyword to search
+ --help           Show help menu
